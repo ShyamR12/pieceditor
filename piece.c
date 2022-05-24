@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "piece.h"
 
 void inorder(tree root)
 {
@@ -74,9 +75,17 @@ node *insert(tree *root, long st, long len, char *msg, long index)
             else if (index > offset)
             {
                 // split the current node
+                p = split(p, st, len, msg, index, offset, &tmp);
+                break;
             }
 
             // offset = p->size_left;
+        }
+        node *re_offset = tmp;
+        while (re_offset)
+        {
+            re_offset->size_left = new_offset(re_offset);
+            re_offset = re_offset->parent;
         }
     }
 }
