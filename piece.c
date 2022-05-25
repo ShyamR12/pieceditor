@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "piece.h"
 
 void inorder(tree root)
@@ -7,21 +8,23 @@ void inorder(tree root)
     if (root)
     {
         inorder(root->left);
-        printf("%ld  %s\n", root->blk->start, root->blk->txt);
+        // printf("Inside inorder ");
+        printf("%s",root->blk->txt);
         inorder(root->right);
     }
     return;
 }
 
-node *insert(tree *root, long st, long len, char *msg, long index)
+node *insert(tree root,long len, char *msg,long index)
 {
-    node *p = *root;
-    long offset = p->size_left;
+	
+    node *p = root;
+    long offset = 0;
     // creating a new piece
     piece *new_msg = (piece *)malloc(sizeof(piece));
-    new_msg->start = index;
+    // new_msg->start = index;
     new_msg->length = len;
-    new_msg->txt = (char *)malloc(sizeof(char) * (len + 1));
+    // new_msg->txt = (char *)malloc(sizeof(char) * (len + 1));
     new_msg->txt = msg;
 
     // creating the node of tree
@@ -32,14 +35,17 @@ node *insert(tree *root, long st, long len, char *msg, long index)
 
     if (p == NULL)
     {
+    	printf("root is NULL\n");
         return tmp;
     }
     else
     {
+        offset = p->size_left;
         while (1)
         {
             if (index == offset)
             {
+           	printf("Got index = offset\n");
                 node *child = p->left;
                 p->left = tmp;
                 p->left->parent = p->left;
@@ -51,7 +57,7 @@ node *insert(tree *root, long st, long len, char *msg, long index)
                     re_offset->size_left = new_offset(re_offset);
                     re_offset = re_offset->parent;
                 }
-                return *root;
+                return root;
             }
             else if (index < offset)
             {
@@ -64,7 +70,7 @@ node *insert(tree *root, long st, long len, char *msg, long index)
                 //     // split the current node
                 // }
                 // // check node_length + offset if > index then split
-                offset = p->size_left;
+                offset += p->size_left;
             }
             else if (index > offset + p->blk->length)
             {
@@ -75,18 +81,20 @@ node *insert(tree *root, long st, long len, char *msg, long index)
             else if (index > offset)
             {
                 // split the current node
-                p = split(p, st, len, msg, index, offset, &tmp);
-                break;
+                p = split(p,len, msg, index, offset, &tmp);
+                node *re_offset = tmp;
+        	while (re_offset)
+        	{
+            		re_offset->size_left = new_offset(re_offset);
+            		re_offset = re_offset->parent;
+        	}
+		return root;
             }
 
             // offset = p->size_left;
         }
-        node *re_offset = tmp;
-        while (re_offset)
-        {
-            re_offset->size_left = new_offset(re_offset);
-            re_offset = re_offset->parent;
-        }
+
+
     }
 }
 
@@ -101,14 +109,14 @@ long new_offset(node *t)
     return off;
 }
 
-node *split(tree parent, long st, long len, char *msg, long index, long offset, tree *tmp)
+node *split(tree parent,long len, char *msg, long index, long offset, tree *tmp)
 {
     node *p = parent;
     node *grandchild = p->left;
 
     // creating later half of the split
     piece *new_msg = (piece *)malloc(sizeof(piece));
-    new_msg->start = p->left->size_left;
+    // new_msg->start = p->left->size_left;
     new_msg->length = index;
     new_msg->txt = (char *)malloc(sizeof(char) * (new_msg->length + 1));
     strncpy(new_msg->txt, msg, new_msg->length);
@@ -137,3 +145,4 @@ node *split(tree parent, long st, long len, char *msg, long index, long offset, 
     parent->size_left = new_offset(parent);
     return parent;
 }
+
