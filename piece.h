@@ -16,7 +16,10 @@ typedef struct node
 
 typedef node *tree;
 
-node *insert(tree root,long len, char *msg,long index);
+piece *createPiece(char *msg, long len);
+node *insert(tree root, long len, char *msg, long index);
 void inorder(node *root);
 long new_offset(node *t);
-node *split(tree parent,long len, char *msg, long index, long offset, tree *tmp);
+node *split(tree parent, long len, char *msg, long index, long offset, tree *tmp);
+long num_nodes(tree root);
+long totalTxtLength(tree root);
