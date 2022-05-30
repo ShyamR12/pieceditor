@@ -90,7 +90,6 @@ node *insert(tree root, long len, char *msg, long index)
         {
             // printf("Reached here 0\n");
             printf("Length of p->blk is %ld , index is %ld and offset is %ld.\n", p->blk->length, index, offset);
-
             if (index == offset)
             {
                 printf("Got index = offset\n");
@@ -158,14 +157,17 @@ node *insert(tree root, long len, char *msg, long index)
 
                 if (p->parent == NULL)
                 {
+                    printf("p->parent == NULL\n");
                     root = split(p, len, msg, index, offset);
                 }
                 else if (p == p->parent->left)
                 {
+                    printf("p == p->parent->left\n");
                     p->parent->left = split(p, len, msg, index, offset);
                 }
                 else
                 {
+                    printf("p == p->parent->right\n");
                     p->parent->right = split(p, len, msg, index, offset);
                 }
                 // node *re_offset = tmp;
@@ -213,21 +215,34 @@ void new_offset(node *t)
 
 node *split(tree parent, long len, char *msg, long index, long offset)
 {
+    // printf("offset - %ld, len - %ld and index - %ld\n", offset, len, index);
     node *p = parent;
     node *first_half_ptr = (node *)malloc(sizeof(node));
     node *child = (node *)malloc(sizeof(node));
     node *half = (node *)malloc(sizeof(node));
     node *grandchild = p->left;
 
+    // printf("Creating first half\n");
     // new first half
-    piece *first_half = createPiece(p->blk->txt, offset - index);
+
+    piece *first_half = (piece *)malloc(sizeof(piece));
+    first_half->length = p->blk->length - index + offset;
+    // printf("len is %ld\n", len);
+    first_half->txt = (char *)malloc(sizeof(char) * (p->blk->length - index + offset + 1));
+    // strncpy(first_half->txt, p->blk->txt + p->blk->length - index + offset, p->blk->length);
+    strncpy(first_half->txt, p->blk->txt + index - offset, p->blk->length - index + offset);
+    // piece *first_half = createPiece(p->blk->txt, parent->blk->length + offset - index);
+    // printf("first_half->txt = %s\n", first_half->txt);
+    // printf("first_half created\n");
     first_half_ptr->blk = first_half;
     first_half_ptr->left = child;
-    first_half_ptr->right = NULL;
+    first_half_ptr->right = p->right;
     first_half_ptr->parent = p->parent;
 
     // new msg
+    // printf("Creating new msg\n");
     piece *new_msg = createPiece(msg, len);
+    // printf("new_msg->txt = %s\n", new_msg->txt);
     child->blk = new_msg;
     child->left = half;
     child->right = NULL;
@@ -235,10 +250,10 @@ node *split(tree parent, long len, char *msg, long index, long offset)
     child->size_left = child->size_right = 0;
 
     // creating remaining half of the split
-    piece *half_msg = (piece *)malloc(sizeof(piece));
-    half_msg->length = len;
-    half_msg->txt = (char *)malloc(sizeof(char) * (index + 1));
-    strncpy(half_msg->txt, p->blk->txt + len, index);
+    // printf("Creating the other half\n");
+
+    piece *half_msg = createPiece(p->blk->txt, index - offset);
+    // printf("half_msg->txt = %s\n", half_msg->txt);
     half->blk = half_msg;
     half->left = grandchild;
     half->right = NULL;
@@ -252,10 +267,12 @@ node *split(tree parent, long len, char *msg, long index, long offset)
         grandchild->parent = half;
     }
 
+    // printf("Re offseting\n");
     // re_offsetting
     new_offset(half);
     new_offset(child);
     new_offset(first_half_ptr);
     // new_offset(parent);
+    // printf("Reached at the end\n");
     return first_half_ptr;
 }

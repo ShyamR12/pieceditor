@@ -138,5 +138,389 @@ Inserted and num_nodes = 4
 My fav colourblue
 index of last is 17
 Inserted and num_nodes = 5
-My fav colour is blue
-index of last is 21
+My fav colour is blue1.
+char piece1[] = "Hello";
+table = insert(table, strlen(piece1), piece1, 0);
+printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+inorder(table);
+printf("\n");
+printf("index of last is %ld\n", totalTxtLength(table));
+
+char piece2[] = "World";
+table = insert(table, strlen(piece2), piece2, 0);
+printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+inorder(table);
+printf("\n");
+printf("index of last is %ld\n", totalTxtLength(table));
+
+char piece3[] = " ";
+table = insert(table, strlen(piece3), piece3, 5);
+printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+inorder(table);
+printf("\n");
+printf("index of last is %ld\n", totalTxtLength(table));
+
+char piece4[] = "!";
+table = insert(table, strlen(piece4), piece4, totalTxtLength(table));
+printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+inorder(table);
+printf("\n");
+printf("index of last is %ld\n", totalTxtLength(table));
+
+----------------------------------------------------------------------
+output:
+
+Length of Hello is 5
+Inserted and num_nodes = 1
+Hello
+index of last is 5
+Inserted and num_nodes = 2
+WorldHello
+index of last is 10
+Inserted and num_nodes = 3
+World Hello
+index of last is 11
+Inserted and num_nodes = 4
+World Hello!
+index of last is 6
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+
+2. char piece1[] = "is";
+	table = insert(table, strlen(piece1), piece1, 0);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+
+	char piece2[] = "This";
+	table = insert(table, strlen(piece2), piece2, 0);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+
+	char piece3[] = "a";
+	table = insert(table, strlen(piece3), piece3, totalTxtLength(table));
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+
+	char piece4[] = "*";
+	table = insert(table, strlen(piece4), piece4, 4);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+
+	char piece5[] = "*";
+	table = insert(table, strlen(piece5), piece5, 7);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+
+	char piece6[] = "*sentence";
+	table = insert(table, strlen(piece6), piece6, totalTxtLength(table));
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+----------------------------------------------------------------------
+output
+
+Inserted and num_nodes = 1
+is
+index of last is 2
+Inserted and num_nodes = 2
+Thisis
+index of last is 6
+Inserted and num_nodes = 3
+Thisisa
+index of last is 7
+Inserted and num_nodes = 4
+This*isa
+index of last is 8
+Inserted and num_nodes = 5
+This*is*a
+index of last is 9
+Inserted and num_nodes = 6
+This*is*a*sentence
+index of last is 18
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+
+3.
+char piece1[] = "HelloWorld";
+table = insert(table, strlen(piece1), piece1, 0);
+printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+inorder(table);
+printf("\n");
+printf("index of last is %ld\n", totalTxtLength(table));
+printf("\n");
+char piece2[] = "Hey*";
+table = insert(table, strlen(piece2), piece2, 0);
+printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+inorder(table);
+printf("\n");
+printf("index of last is %ld\n", totalTxtLength(table));
+printf("\n");
+char piece3[] = "*";
+table = insert(table, strlen(piece3), piece3, 9);
+printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+inorder(table);
+printf("\n");
+printf("index of last is %ld\n", totalTxtLength(table));
+printf("\n");
+----------------------------------------------------------------------
+output: 
+
+Inserted and num_nodes = 1
+HelloWorld
+index of last is 10
+
+Length of p->blk is 10 , index is 0 and offset is 0.
+Got index = offset
+Inserted and num_nodes = 2
+Hey*HelloWorld
+index of last is 14
+
+Length of p->blk is 10 , index is 9 and offset is 4.
+Splitting
+p->parent == NULL
+Inserted and num_nodes = 4
+Hey*Hello*World
+index of last is 15
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+4.
+char piece1[] = "This is a sentence";
+	table = insert(table, strlen(piece1), piece1, 0);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+	printf("\n");
+
+	char piece2[] = "i";
+	table = insert(table, strlen(piece2), piece2, 13);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+	printf("\n");
+----------------------------------------------------------------------
+output 
+
+Inserted and num_nodes = 1
+This is a sentence
+index of last is 18
+
+Inserted and num_nodes = 3
+This is a senitence
+index of last is 27
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+5.
+char piece1[] = "eWol";
+	table = insert(table, strlen(piece1), piece1, 0);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+	printf("\n");
+
+	char piece2[] = "H";
+	table = insert(table, strlen(piece2), piece2, 0);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+	printf("\n");
+
+	char piece3[] = "llo*";
+	table = insert(table, strlen(piece3), piece3, 2);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+	printf("\n");
+
+	char piece4[] = "!";
+	table = insert(table, strlen(piece4), piece4, totalTxtLength(table));
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+	printf("\n");
+
+	char piece5[] = "d";
+	table = insert(table, strlen(piece5), piece5, totalTxtLength(table) - 1);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+	printf("\n");
+
+	char piece6[] = "r";
+	table = insert(table, strlen(piece6), piece6, totalTxtLength(table) - 3);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+	printf("\n");
+----------------------------------------------------------------------
+
+output
+Inserted and num_nodes = 1
+eWol
+index of last is 4
+
+Inserted and num_nodes = 2
+HeWol
+index of last is 5
+
+Inserted and num_nodes = 4
+Hello*Wol
+index of last is 9
+
+Inserted and num_nodes = 5
+Hello*Wol!
+index of last is 10
+
+Inserted and num_nodes = 6
+Hello*Wold!
+index of last is 11
+
+Inserted and num_nodes = 8
+Hello*World!
+index of last is 12
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+	char piece1[] = "ori";
+	table = insert(table, strlen(piece1), piece1, 0);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+	printf("\n");
+
+	char piece2[] = "My";
+	table = insert(table, strlen(piece2), piece2, 0);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+	printf("\n");
+
+	char piece3[] = "*fv*";
+	table = insert(table, strlen(piece3), piece3, 2);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+	printf("\n");
+
+	char piece4[] = "a";
+	table = insert(table, strlen(piece4), piece4, 4);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+	printf("\n");
+
+	char piece5[] = "bue";
+	table = insert(table, strlen(piece5), piece5, totalTxtLength(table));
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+	printf("\n");
+
+	char piece6[] = "l";
+	table = insert(table, strlen(piece6), piece6, totalTxtLength(table) - 2);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+	printf("\n");
+
+	char piece7[] = "*";
+	table = insert(table, strlen(piece7), piece7, 9);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+	printf("\n");
+
+	char piece8[] = "col";
+	table = insert(table, strlen(piece8), piece8, 7);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+	printf("\n");
+
+	char piece9[] = "*";
+	table = insert(table, strlen(piece9), piece9, totalTxtLength(table) - 4);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+	printf("\n");
+
+	char piece10[] = "s";
+	table = insert(table, strlen(piece10), piece10, totalTxtLength(table) - 5);
+	printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	inorder(table);
+	printf("\n");
+	printf("index of last is %ld\n", totalTxtLength(table));
+	printf("\n");
+
+----------------------------------------------------------------------
+output
+Inserted and num_nodes = 1
+ori
+index of last is 3
+
+Inserted and num_nodes = 2
+Myori
+index of last is 5
+
+Inserted and num_nodes = 3
+My*fv*ori
+index of last is 9
+
+Inserted and num_nodes = 5
+My*fav*ori
+index of last is 9
+
+Inserted and num_nodes = 6
+My*fav*oribue
+index of last is 13
+
+Inserted and num_nodes = 8
+My*fav*oriblue
+index of last is 13
+
+Inserted and num_nodes = 10
+My*fav*or*iblue
+index of last is 15
+
+Inserted and num_nodes = 11
+My*fav*color*iblue
+index of last is 18
+
+Inserted and num_nodes = 12
+My*fav*color*i*blue
+index of last is 19
+
+Inserted and num_nodes = 13
+My*fav*color*is*blue
+index of last is 20
+----------------------------------------------------------------------
+----------------------------------------------------------------------
