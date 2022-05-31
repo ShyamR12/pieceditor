@@ -67,9 +67,9 @@ long num_nodes(tree root)
     return left + right + 1;
 }
 
-node *insert(tree root, long len, char *msg, long index)
+node *insert(tree *root, long len, char *msg, long index)
 {
-    node *p = root;
+    node *p = *root;
     long offset = 0;
     // creating the node of tree
     node *tmp = (node *)malloc(sizeof(node));
@@ -101,23 +101,18 @@ node *insert(tree root, long len, char *msg, long index)
                 {
                     child->parent = p->left;
                 }
+                // splay(tmp, root);
                 node *re_offset = tmp;
                 while (re_offset)
                 {
                     new_offset(re_offset);
                     re_offset = re_offset->parent;
                 }
-                return root;
+                return *root;
             }
             else if (index == p->blk->length + offset)
             {
                 printf("Got index == p->blk->length + offset\n");
-
-                // while (p->right)
-                // {
-                //     p = p->right;
-                // }
-                // printf("Reached in index == offset +  p->blk->length\n");
                 node *child = p->right;
                 p->right = tmp;
                 p->right->parent = p;
@@ -126,6 +121,7 @@ node *insert(tree root, long len, char *msg, long index)
                 {
                     child->parent = p->right;
                 }
+                // splay(tmp, root);
                 node *re_offset = tmp;
                 while (re_offset)
                 {
@@ -134,7 +130,7 @@ node *insert(tree root, long len, char *msg, long index)
                     // printf("txt inside re_offset now is %s\n", re_offset->blk->txt);
                     re_offset = re_offset->parent;
                 }
-                return root;
+                return *root;
             }
             else if (index < offset)
             {
@@ -154,36 +150,31 @@ node *insert(tree root, long len, char *msg, long index)
             {
                 // split the current node
                 printf("Splitting\n");
-
+                node *nn = NULL;
                 if (p->parent == NULL)
                 {
                     printf("p->parent == NULL\n");
-                    root = split(p, len, msg, index, offset);
+                    *root = split(p, len, msg, index, offset, &nn);
+                    // splay(nn, root);
                 }
                 else if (p == p->parent->left)
                 {
                     printf("p == p->parent->left\n");
-                    p->parent->left = split(p, len, msg, index, offset);
+                    p->parent->left = split(p, len, msg, index, offset, &nn);
+                    // splay(nn, root);
                 }
                 else
                 {
                     printf("p == p->parent->right\n");
-                    p->parent->right = split(p, len, msg, index, offset);
+                    p->parent->right = split(p, len, msg, index, offset, &nn);
+                    // splay(nn, root);
                 }
-                // node *re_offset = tmp;
-                // while (re_offset)
-                // {
-                //     new_offset(re_offset);
-                //     re_offset = re_offset->parent;
-                // }
-                return root;
+                return *root;
             }
             else
             {
                 printf("Entered in else part\n");
             }
-
-            // offset = p->size_left;
             // printf("Looping\n");
         }
     }
@@ -213,7 +204,7 @@ void new_offset(node *t)
     t->size_right = off_right;
 }
 
-node *split(tree parent, long len, char *msg, long index, long offset)
+node *split(tree parent, long len, char *msg, long index, long offset, tree *nn)
 {
     // printf("offset - %ld, len - %ld and index - %ld\n", offset, len, index);
     node *p = parent;
@@ -221,7 +212,7 @@ node *split(tree parent, long len, char *msg, long index, long offset)
     node *child = (node *)malloc(sizeof(node));
     node *half = (node *)malloc(sizeof(node));
     node *grandchild = p->left;
-
+    *nn = child;
     // printf("Creating first half\n");
     // new first half
 
@@ -275,4 +266,179 @@ node *split(tree parent, long len, char *msg, long index, long offset)
     // new_offset(parent);
     // printf("Reached at the end\n");
     return first_half_ptr;
+}
+
+void LLrotate(tree *q, tree *root)
+{
+    node *gp = *q;
+    node *p = gp->left;
+    if (gp->parent)
+    {
+        if (gp->parent->left == gp)
+        {
+            gp->parent->left = p;
+        }
+        else
+        {
+            gp->parent->right = p;
+        }
+    }
+    else
+    {
+        *root = p;
+    }
+    p->parent = gp->parent;
+    gp->left = p->right;
+    if (gp->left)
+    {
+
+        gp->left->parent = gp;
+    }
+    p->right = gp;
+    gp->parent = p;
+    new_offset(gp);
+    new_offset(p);
+    *q = p;
+}
+
+void RRrotate(tree *q, tree *root)
+{
+    node *gp = *q;
+    node *p = gp->right;
+    if (gp->parent)
+    {
+        if (gp->parent->left == gp)
+        {
+            gp->parent->left = p;
+        }
+        else
+        {
+            gp->parent->right = p;
+        }
+    }
+    else
+    {
+        *root = p;
+    }
+    p->parent = gp->parent;
+    gp->right = p->left;
+    if (gp->right)
+    {
+
+        gp->right->parent = gp;
+    }
+    p->left = gp;
+    gp->parent = p;
+    new_offset(gp);
+    new_offset(p);
+    *q = p;
+}
+
+void splay(tree p, tree *root)
+{
+    while (p != *root)
+    {
+        if (p == *root)
+        {
+            return;
+        }
+        node *critical = NULL;
+
+        // grandparent doesn't exist
+        if (p->parent->parent == NULL)
+        {
+            if (p->parent->left == p)
+            {
+                // do ll rotation
+                critical = p->parent;
+                LLrotate(&critical, root);
+            }
+            else
+            {
+                // do rr rotation
+                critical = p->parent;
+                RRrotate(&critical, root);
+            }
+        }
+        else
+        {
+            if (p->parent->left == p)
+            {
+                /*
+                    p
+                  /
+                c
+
+                */
+                if (p->parent->parent->left == p->parent)
+                {
+                    /*
+                      gp
+                     /
+                    p
+                  /
+                c
+
+                */
+                    critical = p->parent->parent;
+                    node *critical2 = p->parent;
+                    LLrotate(&critical, root);
+                    LLrotate(&critical2, root);
+
+                    // perform ll rotation on gp then again 1 ll on p
+                }
+                else
+                {
+                    /*
+                    gp
+                      \
+                       p
+                      /
+                    c
+
+                    */
+                    //    ll on p then rr on gp
+                    critical = p->parent;
+                    LLrotate(&critical, root);
+                    critical = p->parent;
+                    RRrotate(&critical, root);
+                }
+            }
+            else
+            {
+                if (p->parent->parent->left == p->parent)
+                {
+                    /*
+                      gp
+                     /
+                    p
+                     \
+                      c
+
+                */
+                    //    rr on p then ll on gp
+                    critical = p->parent;
+                    RRrotate(&critical, root);
+                    critical = p->parent;
+                    LLrotate(&critical, root);
+                }
+                else
+                {
+                    /*
+                  gp
+                   \
+                    p
+                     \
+                      c
+
+                */
+                    //    rr on p then rr on c
+                    critical = p->parent->parent;
+                    node *critical2 = p->parent;
+                    RRrotate(&critical, root);
+                    RRrotate(&critical2, root);
+                }
+            }
+        }
+    }
 }
