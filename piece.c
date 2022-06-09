@@ -89,10 +89,10 @@ node *insert(tree *root, long len, char *msg, long index)
         while (1)
         {
             // printf("Reached here 0\n");
-            printf("Length of p->blk is %ld , index is %ld and offset is %ld.\n", p->blk->length, index, offset);
+            // printf("Length of p->blk is %ld , index is %ld and offset is %ld.\n", p->blk->length, index, offset);
             if (index == offset)
             {
-                printf("Got index = offset\n");
+                // printf("Got index = offset\n");
                 node *child = p->left;
                 p->left = tmp;
                 p->left->parent = p;
@@ -101,18 +101,18 @@ node *insert(tree *root, long len, char *msg, long index)
                 {
                     child->parent = p->left;
                 }
-                // splay(tmp, root);
                 node *re_offset = tmp;
                 while (re_offset)
                 {
                     new_offset(re_offset);
                     re_offset = re_offset->parent;
                 }
+                splay(tmp, root);
                 return *root;
             }
             else if (index == p->blk->length + offset)
             {
-                printf("Got index == p->blk->length + offset\n");
+                // printf("Got index == p->blk->length + offset\n");
                 node *child = p->right;
                 p->right = tmp;
                 p->right->parent = p;
@@ -121,7 +121,6 @@ node *insert(tree *root, long len, char *msg, long index)
                 {
                     child->parent = p->right;
                 }
-                // splay(tmp, root);
                 node *re_offset = tmp;
                 while (re_offset)
                 {
@@ -130,44 +129,52 @@ node *insert(tree *root, long len, char *msg, long index)
                     // printf("txt inside re_offset now is %s\n", re_offset->blk->txt);
                     re_offset = re_offset->parent;
                 }
+                splay(tmp, root);
                 return *root;
             }
             else if (index < offset)
             {
-                printf("Reached at index < offset\n");
+                // printf("Reached at index < offset\n");
                 // offset += p->size_left;
                 p = p->left;
                 offset = p->size_left;
             }
             else if (index > offset + p->blk->length)
             {
-                printf("Reached index>offset + p->blk->length\n");
+                // printf("Reached index>offset + p->blk->length\n");
                 offset = offset + p->blk->length;
                 p = p->right;
+                offset = offset + p->size_left;
                 // move to the right side
             }
             else if (index > offset && (index < offset + p->blk->length))
             {
                 // split the current node
-                printf("Splitting\n");
+                // printf("Splitting\n");
                 node *nn = NULL;
                 if (p->parent == NULL)
                 {
-                    printf("p->parent == NULL\n");
+                    // printf("p->parent == NULL\n");
                     *root = split(p, len, msg, index, offset, &nn);
-                    // splay(nn, root);
+                    // printf("Before splaying1\n");
+                    // infoInorder(*root);
+                    splay(nn, root);
                 }
                 else if (p == p->parent->left)
                 {
-                    printf("p == p->parent->left\n");
+                    // printf("p == p->parent->left\n");
                     p->parent->left = split(p, len, msg, index, offset, &nn);
-                    // splay(nn, root);
+                    // printf("Before splaying2\n");
+                    // infoInorder(*root);
+                    splay(nn, root);
                 }
                 else
                 {
-                    printf("p == p->parent->right\n");
+                    // printf("p == p->parent->right\n");
                     p->parent->right = split(p, len, msg, index, offset, &nn);
-                    // splay(nn, root);
+                    // printf("Before splaying3\n");
+                    // infoInorder(*root);
+                    splay(nn, root);
                 }
                 return *root;
             }
@@ -206,8 +213,8 @@ void new_offset(node *t)
 
 node *split(tree parent, long len, char *msg, long index, long offset, tree *nn)
 {
-    // printf("offset - %ld, len - %ld and index - %ld\n", offset, len, index);
     node *p = parent;
+    // printf("offset - %ld, len - %ld, p->blk->length - %ld and index - %ld\n", offset, len, p->blk->length, index);
     node *first_half_ptr = (node *)malloc(sizeof(node));
     node *child = (node *)malloc(sizeof(node));
     node *half = (node *)malloc(sizeof(node));
@@ -220,14 +227,17 @@ node *split(tree parent, long len, char *msg, long index, long offset, tree *nn)
     first_half->length = p->blk->length - index + offset;
     // printf("len is %ld\n", len);
     first_half->txt = (char *)malloc(sizeof(char) * (p->blk->length - index + offset + 1));
-    // strncpy(first_half->txt, p->blk->txt + p->blk->length - index + offset, p->blk->length);
     strncpy(first_half->txt, p->blk->txt + index - offset, p->blk->length - index + offset);
-    // piece *first_half = createPiece(p->blk->txt, parent->blk->length + offset - index);
-    // printf("first_half->txt = %s\n", first_half->txt);
-    // printf("first_half created\n");
+    first_half->txt[first_half->length] = '\0';
+    // printf("First half text is %s\n", first_half->txt);
     first_half_ptr->blk = first_half;
     first_half_ptr->left = child;
     first_half_ptr->right = p->right;
+    if (first_half_ptr->right)
+    {
+        first_half_ptr->right->parent = first_half_ptr;
+    }
+
     first_half_ptr->parent = p->parent;
 
     // new msg
@@ -265,6 +275,7 @@ node *split(tree parent, long len, char *msg, long index, long offset, tree *nn)
     new_offset(first_half_ptr);
     // new_offset(parent);
     // printf("Reached at the end\n");
+    // free(parent);
     return first_half_ptr;
 }
 
@@ -336,6 +347,11 @@ void RRrotate(tree *q, tree *root)
 
 void splay(tree p, tree *root)
 {
+    if (p == NULL)
+    {
+        return;
+    }
+
     while (p != *root)
     {
         if (p == *root)
@@ -350,12 +366,14 @@ void splay(tree p, tree *root)
             if (p->parent->left == p)
             {
                 // do ll rotation
+                // printf("Classified as LL\n");
                 critical = p->parent;
                 LLrotate(&critical, root);
             }
             else
             {
                 // do rr rotation
+                // printf("Classified as RR\n");
                 critical = p->parent;
                 RRrotate(&critical, root);
             }
@@ -380,6 +398,7 @@ void splay(tree p, tree *root)
                 c
 
                 */
+                    // printf("Classified as LL + LL\n");
                     critical = p->parent->parent;
                     node *critical2 = p->parent;
                     LLrotate(&critical, root);
@@ -398,6 +417,7 @@ void splay(tree p, tree *root)
 
                     */
                     //    ll on p then rr on gp
+                    // printf("Classified as RL\n");
                     critical = p->parent;
                     LLrotate(&critical, root);
                     critical = p->parent;
@@ -416,6 +436,7 @@ void splay(tree p, tree *root)
                       c
 
                 */
+                    // printf("Classified as LR\n");
                     //    rr on p then ll on gp
                     critical = p->parent;
                     RRrotate(&critical, root);
@@ -433,6 +454,7 @@ void splay(tree p, tree *root)
 
                 */
                     //    rr on p then rr on c
+                    // printf("Classified as RR + RR\n");
                     critical = p->parent->parent;
                     node *critical2 = p->parent;
                     RRrotate(&critical, root);
