@@ -56,13 +56,24 @@ int main()
 
 	char piece9[] = "*";
 	table = insert(&table, strlen(piece9), piece9, totalTxtLength(table) - 4);
-	inorder(table);
+	infoInorder(table);
 	printf("\n");
 	printf("\n");
 
 	char piece10[] = "s";
 	table = insert(&table, strlen(piece10), piece10, totalTxtLength(table) - 5);
-	inorder(table);
+	infoInorder(table);
+	printf("\n");
+	printf("\n");
+
+	printf("Testing undo operation\n\n");
+	table = undo(table);
+	infoInorder(table);
+	printf("\n");
+	printf("\n");
+
+	table = undo(table);
+	infoInorder(table);
 	printf("\n");
 	printf("\n");
 	return 0;

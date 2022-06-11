@@ -3,6 +3,23 @@
 #include <string.h>
 #include "piece.h"
 
+void fileInorder(tree root, char *filename)
+{
+    FILE *fp = fopen(filename, "a+");
+    helpInorder(root, fp);
+    fclose(fp);
+}
+
+void helpInorder(tree root, FILE *fp)
+{
+    if (root)
+    {
+        helpInorder(root->left, fp);
+        fputs(root->blk->txt, fp);
+        helpInorder(root->right, fp);
+    }
+}
+
 void infoInorder(tree root)
 {
     if (root)
@@ -463,4 +480,40 @@ void splay(tree p, tree *root)
             }
         }
     }
+}
+
+node *undo(node *root)
+{
+    node *temp;
+    if (root == NULL)
+    {
+        return NULL;
+    }
+
+    if (root->left == NULL)
+    {
+        temp = root;
+        root = root->right;
+        root->parent = NULL;
+    }
+    else
+    {
+        temp = root;
+        root->left->parent = NULL;
+        node *pred = root->left;
+        while (pred->right)
+        {
+            pred = pred->right;
+        }
+        splay(pred, &(root->left));
+        root = root->left;
+        root->right = temp->right;
+        if (root->right)
+        {
+            root->right->parent = root;
+        }
+    }
+    free(temp);
+    new_offset(root);
+    return root;
 }
