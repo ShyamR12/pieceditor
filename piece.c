@@ -167,7 +167,9 @@ node *insert(tree *root, long len, char *msg, long index, stack_ll *undo_st, sta
                 // printf("Reached at index < offset\n");
                 // offset += p->size_left;
                 p = p->left;
-                offset = p->size_left;
+                // offset = p->size_left;
+                // changed here
+                offset = offset - p->blk->length - p->size_right;
             }
             else if (index > offset + p->blk->length)
             {

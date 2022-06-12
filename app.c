@@ -36,23 +36,23 @@ int main()
 	// printf("index of last is %ld\n", totalTxtLength(table));
 	printf("\n");
 
-	printf("undo\n");
-	table = undo(table, &undo_st, &redo_st);
-	inorder(table);
-	printf("\n");
-	char piece12[] = "O";
-	table = insert(&table, strlen(piece12), piece12, totalTxtLength(table) - 3, &undo_st, &redo_st, 0);
-	// printf("Inserted and num_nodes = %ld\n", num_nodes(table));
-	inorder(table);
-	printf("\n");
-	printf("Redo\n");
-	table = redo(&table, &redo_st, &undo_st);
-	inorder(table);
-	printf("\n");
-	printf("Redo\n");
-	table = redo(&table, &redo_st, &undo_st);
-	inorder(table);
-	printf("\n");
+	// printf("undo\n");
+	// table = undo(table, &undo_st, &redo_st);
+	// inorder(table);
+	// printf("\n");
+	// char piece12[] = "O";
+	// table = insert(&table, strlen(piece12), piece12, totalTxtLength(table) - 3, &undo_st, &redo_st, 0);
+	// // printf("Inserted and num_nodes = %ld\n", num_nodes(table));
+	// inorder(table);
+	// printf("\n");
+	// printf("Redo\n");
+	// table = redo(&table, &redo_st, &undo_st);
+	// inorder(table);
+	// printf("\n");
+	// printf("Redo\n");
+	// table = redo(&table, &redo_st, &undo_st);
+	// inorder(table);
+	// printf("\n");
 
 	char piece4[] = "a";
 	table = insert(&table, strlen(piece4), piece4, 4, &undo_st, &redo_st, 0);
@@ -98,7 +98,6 @@ int main()
 
 	// printf("index of last is %ld\n", totalTxtLength(table));
 	printf("\n");
-
 	char piece9[] = "*";
 	table = insert(&table, strlen(piece9), piece9, totalTxtLength(table) - 4, &undo_st, &redo_st, 0);
 	// printf("Inserted and num_nodes = %ld\n", num_nodes(table));
@@ -107,6 +106,7 @@ int main()
 
 	// printf("index of last is %ld\n", totalTxtLength(table));
 	printf("\n");
+	// printf("Reached here before 10\n");
 
 	char piece10[] = "s";
 	table = insert(&table, strlen(piece10), piece10, totalTxtLength(table) - 5, &undo_st, &redo_st, 0);

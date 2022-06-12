@@ -361,6 +361,39 @@ void processKeypress(char **str, tree *table, stack_ll *undo_st, stack_ll *redo_
     case CTRL_KEY('s'):
         editorSave();
         break;
+    case CTRL_KEY('y'):
+        if (*redo_st)
+        {
+            p = (*redo_st)->data;
+            int start_redo = (*redo_st)->index;
+            int end_redo = start_redo + p->blk->length;
+            char *str = (char *)malloc(sizeof(char) * (p->blk->length + 1));
+            memcpy(str, p->blk->txt, p->blk->length);
+            str[p->blk->length] = '\0';
+            if (win.cx > start_redo)
+            {
+                while (win.cx != start_redo)
+                {
+                    moveCursor(ARROW_LEFT);
+                }
+            }
+            else
+            {
+                while (win.cx != start_redo)
+                {
+                    moveCursor(ARROW_RIGHT);
+                }
+            }
+            for (int i = start_redo; i < end_redo; i++)
+            {
+                insertChar(str[i - start_redo]);
+            }
+
+            *table = redo(table, redo_st, undo_st);
+            remove("text_to_piece_table.txt");
+            fileInorder(*table, "text_to_piece_table.txt");
+        }
+        break;
     case CTRL_KEY('z'):
         if (*undo_st)
         {
