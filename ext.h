@@ -37,7 +37,7 @@ void setStatusMessage(const char *fmt, ...);
 
 char *prompt(char *prompt);
 void moveCursor(int key);
-void processKeypress(char **str, tree *table);
+void processKeypress(char **str, tree *table, stack_ll *undo_st);
 
 // raw
 void die(const char *s);

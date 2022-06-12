@@ -330,12 +330,13 @@ void moveCursor(int key)
     }
 }
 
-void processKeypress(char **str, tree *table)
+void processKeypress(char **str, tree *table, stack_ll *undo_st)
 {
     static int start = 0;
     static int end = 0;
     static int quit_times = QUIT_TIMES;
     int c = editorReadKey();
+    node *p = NULL;
 
     switch (c)
     {
@@ -360,26 +361,67 @@ void processKeypress(char **str, tree *table)
     case CTRL_KEY('s'):
         editorSave();
         break;
+    case CTRL_KEY('z'):
+        p = (*undo_st)->data;
+        splay(p, table);
+
+        // printf("Contents of p = %s, length = %ld\n", p->blk->txt, p->blk->length);
+        int x_end = p->size_left + p->blk->length;
+        int len_del = p->blk->length;
+        // printf("x_end before %d\n", x_end);
+        while (p->split_part)
+        {
+            len_del += p->split_part->blk->length;
+            p = p->split_part;
+        }
+        int x_start = x_end - len_del;
+        // printf("x_end after %d\n", x_end);
+        // printf("x_start = %d, x_end = %d\n", x_start, x_end);
+        int j = x_start;
+        if (win.cx > x_start)
+        {
+            while (win.cx != x_start)
+            {
+                moveCursor(ARROW_LEFT);
+            }
+        }
+        else
+        {
+            while (win.cx != x_start)
+            {
+                moveCursor(ARROW_RIGHT);
+            }
+        }
+
+        for (int i = x_start; i < x_end; i++)
+        {
+            moveCursor(ARROW_RIGHT);
+            delChar();
+        }
+        *table = undo(*table, undo_st);
+        remove("text_to_piece_table.txt");
+        fileInorder(*table, "text_to_piece_table.txt");
+        break;
     case CTRL_KEY('i'): // initiate
         start = win.cx;
-        printf("Reached here and x coordinate is %d\n", start);
+        // printf("Reached here and x coordinate is %d\n", start);
         break;
     case CTRL_KEY('t'): // terminate
         end = win.cx;
-        printf("At the end string is %s\n", *str);
-        printf("Reached here and x coordinate is %d\n", end);
-        *table = insert(table, strlen(*str), *str, start);
-        inorder(*table);
+        // printf("At the end string is %s\n", *str);
+        // printf("Reached here and x coordinate is %d\n", end);
+        *table = insert(table, strlen(*str), *str, start, undo_st);
+        // inorder(*table);
         remove("text_to_piece_table.txt");
         fileInorder(*table, "text_to_piece_table.txt");
         free(*str);
         *str = (char *)malloc(sizeof(char));
         strcpy(*str, "\0");
         break;
-    case CTRL_KEY('d'): // display
-        end = win.cx;
-        printf("start = %d, end = %d\n", start, end);
-        break;
+        // case CTRL_KEY('d'): // display
+        //     end = win.cx;
+        //     printf("start = %d, end = %d\n", start, end);
+        //     break;
 
     case HOME_KEY:
         win.cx = 0;

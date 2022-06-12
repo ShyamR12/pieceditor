@@ -84,7 +84,7 @@ long num_nodes(tree root)
     return left + right + 1;
 }
 
-node *insert(tree *root, long len, char *msg, long index)
+node *insert(tree *root, long len, char *msg, long index, stack_ll *undo_st)
 {
     node *p = *root;
     long offset = 0;
@@ -94,10 +94,12 @@ node *insert(tree *root, long len, char *msg, long index)
     tmp->blk = createPiece(msg, len);
     tmp->left = tmp->right = tmp->parent = NULL;
     tmp->size_left = tmp->size_right = 0;
+    tmp->split_part = NULL;
 
     if (p == NULL)
     {
         // printf("root is NULL\n");
+        push(undo_st, tmp);
         return tmp;
     }
     else
@@ -125,6 +127,7 @@ node *insert(tree *root, long len, char *msg, long index)
                     re_offset = re_offset->parent;
                 }
                 splay(tmp, root);
+                push(undo_st, tmp);
                 return *root;
             }
             else if (index == p->blk->length + offset)
@@ -147,6 +150,7 @@ node *insert(tree *root, long len, char *msg, long index)
                     re_offset = re_offset->parent;
                 }
                 splay(tmp, root);
+                push(undo_st, tmp);
                 return *root;
             }
             else if (index < offset)
@@ -193,6 +197,8 @@ node *insert(tree *root, long len, char *msg, long index)
                     // infoInorder(*root);
                     splay(nn, root);
                 }
+                push(undo_st, nn);
+
                 return *root;
             }
             else
@@ -230,9 +236,19 @@ void new_offset(node *t)
 
 node *split(tree parent, long len, char *msg, long index, long offset, tree *nn)
 {
-    node *p = parent;
+
+    // node *p = parent;
+
+    node *p = (node *)malloc(sizeof(node));
+    piece *parent_msg = createPiece(parent->blk->txt, parent->blk->length);
+    p->blk = parent_msg;
+    p->left = parent->left;
+    p->right = parent->right;
+    p->parent = parent->parent;
+    p->split_part = parent->split_part;
+    // int blk_length = p->blk->length;
     // printf("offset - %ld, len - %ld, p->blk->length - %ld and index - %ld\n", offset, len, p->blk->length, index);
-    node *first_half_ptr = (node *)malloc(sizeof(node));
+    node *first_half_ptr = parent;
     node *child = (node *)malloc(sizeof(node));
     node *half = (node *)malloc(sizeof(node));
     node *grandchild = p->left;
@@ -250,6 +266,7 @@ node *split(tree parent, long len, char *msg, long index, long offset, tree *nn)
     first_half_ptr->blk = first_half;
     first_half_ptr->left = child;
     first_half_ptr->right = p->right;
+    first_half_ptr->split_part = half;
     if (first_half_ptr->right)
     {
         first_half_ptr->right->parent = first_half_ptr;
@@ -266,7 +283,7 @@ node *split(tree parent, long len, char *msg, long index, long offset, tree *nn)
     child->right = NULL;
     child->parent = first_half_ptr;
     child->size_left = child->size_right = 0;
-
+    child->split_part = NULL;
     // creating remaining half of the split
     // printf("Creating the other half\n");
 
@@ -277,7 +294,7 @@ node *split(tree parent, long len, char *msg, long index, long offset, tree *nn)
     half->right = NULL;
     half->parent = child;
     half->size_left = half->size_right = 0;
-
+    half->split_part = NULL;
     // joining parent->tmp->child->grandchild
 
     if (grandchild)
@@ -482,38 +499,156 @@ void splay(tree p, tree *root)
     }
 }
 
-node *undo(node *root)
+node *undo(tree root, stack_ll *undo_st)
 {
-    node *temp;
     if (root == NULL)
     {
         return NULL;
     }
+    node *rem = NULL;
+    rem = pop(undo_st);
+    // if (rem == NULL)
+    // {
+    //     printf("rem is null\n");
+    // }
+    // else
+    // {
+    //     printf("rem is %s\n", rem->blk->txt);
+    // }
 
-    if (root->left == NULL)
+    // printf("Reached here 0\n");
+    // printf("root is %s\n", root->blk->txt);
+    splay(rem, &root);
+    // printf("Reached here 1\n");
+    while (rem)
     {
-        temp = root;
-        root = root->right;
-        root->parent = NULL;
+        splay(rem, &root);
+        node *temp;
+        if (root->left == NULL)
+        {
+            temp = root;
+            root = root->right;
+            if (root)
+            {
+                root->parent = NULL;
+            }
+            // printf("Reached\n");
+        }
+        else
+        {
+            // printf("Reached in else part\n");
+            temp = root;
+            root->left->parent = NULL;
+            node *pred = root->left;
+            while (pred->right)
+            {
+                pred = pred->right;
+            }
+            splay(pred, &(root->left));
+            // printf("splayed pred to left top\n");
+            root = root->left;
+            root->right = temp->right;
+            if (root->right)
+            {
+                root->right->parent = root;
+            }
+            // printf("work done\n");
+        }
+        free(temp);
+        new_offset(root);
+        rem = rem->split_part;
+    }
+
+    return root;
+}
+
+void push(stack_ll *top, node *key)
+{
+
+    stack *p = NULL;
+
+    if (*top == NULL)
+    {
+        *top = (stack *)malloc(sizeof(stack));
+
+        (*top)->data = key;
+        (*top)->next = NULL;
     }
     else
     {
-        temp = root;
-        root->left->parent = NULL;
-        node *pred = root->left;
-        while (pred->right)
-        {
-            pred = pred->right;
-        }
-        splay(pred, &(root->left));
-        root = root->left;
-        root->right = temp->right;
-        if (root->right)
-        {
-            root->right->parent = root;
-        }
+        p = (stack *)malloc(sizeof(stack));
+        p->data = key;
+        p->next = *top;
+        *top = p;
     }
-    free(temp);
-    new_offset(root);
-    return root;
 }
+
+int isEmpty(stack *top)
+{
+    if (top == NULL)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+node *pop(stack_ll *top)
+{
+    stack *p = *top;
+    if (!isEmpty)
+    {
+        printf("Stack is Empty\n");
+        return NULL;
+    }
+    node *x = p->data;
+    *top = (*top)->next;
+    free(p);
+    return x;
+}
+
+int isFull()
+{
+    stack *p = (stack *)malloc(sizeof(stack));
+
+    if (p == NULL)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+// node *undo(node *root)
+// {
+//     node *temp;
+//     if (root == NULL)
+//     {
+//         return NULL;
+//     }
+
+//     if (root->left == NULL)
+//     {
+//         temp = root;
+//         root = root->right;
+//         root->parent = NULL;
+//     }
+//     else
+//     {
+//         temp = root;
+//         root->left->parent = NULL;
+//         node *pred = root->left;
+//         while (pred->right)
+//         {
+//             pred = pred->right;
+//         }
+//         splay(pred, &(root->left));
+//         root = root->left;
+//         root->right = temp->right;
+//         if (root->right)
+//         {
+//             root->right->parent = root;
+//         }
+//     }
+//     free(temp);
+//     new_offset(root);
+//     return root;
+// }
