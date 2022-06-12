@@ -84,8 +84,17 @@ long num_nodes(tree root)
     return left + right + 1;
 }
 
-node *insert(tree *root, long len, char *msg, long index, stack_ll *undo_st)
+node *insert(tree *root, long len, char *msg, long index, stack_ll *undo_st, stack_ll *redo_st, int insert_of_redo)
 {
+    if (!insert_of_redo)
+    {
+        while (*redo_st)
+        {
+            int index = 0;
+            pop(redo_st, &index);
+        }
+    }
+
     node *p = *root;
     long offset = 0;
     // creating the node of tree
@@ -99,7 +108,7 @@ node *insert(tree *root, long len, char *msg, long index, stack_ll *undo_st)
     if (p == NULL)
     {
         // printf("root is NULL\n");
-        push(undo_st, tmp);
+        push(undo_st, tmp, index);
         return tmp;
     }
     else
@@ -127,7 +136,7 @@ node *insert(tree *root, long len, char *msg, long index, stack_ll *undo_st)
                     re_offset = re_offset->parent;
                 }
                 splay(tmp, root);
-                push(undo_st, tmp);
+                push(undo_st, tmp, index);
                 return *root;
             }
             else if (index == p->blk->length + offset)
@@ -150,7 +159,7 @@ node *insert(tree *root, long len, char *msg, long index, stack_ll *undo_st)
                     re_offset = re_offset->parent;
                 }
                 splay(tmp, root);
-                push(undo_st, tmp);
+                push(undo_st, tmp, index);
                 return *root;
             }
             else if (index < offset)
@@ -197,7 +206,7 @@ node *insert(tree *root, long len, char *msg, long index, stack_ll *undo_st)
                     // infoInorder(*root);
                     splay(nn, root);
                 }
-                push(undo_st, nn);
+                push(undo_st, nn, index);
 
                 return *root;
             }
@@ -499,14 +508,70 @@ void splay(tree p, tree *root)
     }
 }
 
-node *undo(tree root, stack_ll *undo_st)
+node *joinSplit(tree p)
+{
+    if (p == NULL)
+    {
+        return NULL;
+    }
+
+    node *combined = (node *)malloc(sizeof(node));
+    combined->parent = p->parent;
+    combined->left = p->left;
+    combined->right = p->right;
+    combined->size_left = p->size_left;
+    combined->size_right = p->size_right;
+
+    int msg_len = p->blk->length;
+    char *str = (char *)malloc(p->blk->length + 1);
+    memcpy(str, p->blk->txt, msg_len);
+    str[msg_len] = '\0';
+    // printf("\ninital str is %s\n", str);
+    while (p->split_part)
+    {
+        msg_len += p->split_part->blk->length;
+        char *tmp = (char *)malloc(msg_len + 1);
+        // printf("----\n");
+        for (int i = 0; i < msg_len - strlen(str); i++)
+        {
+            tmp[i] = p->split_part->blk->txt[i];
+            // printf("%c", tmp[i]);
+        }
+        // printf("-");
+        for (int i = msg_len - strlen(str); i < msg_len; i++)
+        {
+            tmp[i] = str[i - msg_len + strlen(str)];
+            // printf("%c", tmp[i]);
+        }
+
+        // printf("\n----\n");
+
+        tmp[msg_len] = '\0';
+        str = tmp;
+        p = p->split_part;
+        // printf("intermediate str is %s\n", str);
+    }
+    // printf("combined str is %s and length is %d\n\n", str, msg_len);
+    // piece *half_msg = createPiece(p->blk->txt, index - offset);
+
+    piece *combined_msg = createPiece(str, strlen(str));
+    combined->blk = combined_msg;
+    combined->split_part = NULL;
+    return combined;
+}
+
+node *undo(tree root, stack_ll *undo_st, stack_ll *redo_st)
 {
     if (root == NULL)
     {
         return NULL;
     }
+    int index = 0;
     node *rem = NULL;
-    rem = pop(undo_st);
+    rem = pop(undo_st, &index);
+    // join if it was splitted earlier
+    node *p = joinSplit(rem);
+    push(redo_st, p, index);
     // if (rem == NULL)
     // {
     //     printf("rem is null\n");
@@ -562,7 +627,19 @@ node *undo(tree root, stack_ll *undo_st)
     return root;
 }
 
-void push(stack_ll *top, node *key)
+node *redo(tree *root, stack_ll *redo_st, stack_ll *undo_st)
+{
+    int index = 0;
+    node *p = pop(redo_st, &index);
+    if (p == NULL)
+    {
+        return *root;
+    }
+    *root = insert(root, p->blk->length, p->blk->txt, index, undo_st, redo_st, 1);
+    return *root;
+}
+
+void push(stack_ll *top, node *key, long pos)
 {
 
     stack *p = NULL;
@@ -572,12 +649,14 @@ void push(stack_ll *top, node *key)
         *top = (stack *)malloc(sizeof(stack));
 
         (*top)->data = key;
+        (*top)->index = pos;
         (*top)->next = NULL;
     }
     else
     {
         p = (stack *)malloc(sizeof(stack));
         p->data = key;
+        p->index = pos;
         p->next = *top;
         *top = p;
     }
@@ -592,15 +671,16 @@ int isEmpty(stack *top)
     return 0;
 }
 
-node *pop(stack_ll *top)
+node *pop(stack_ll *top, int *pos)
 {
     stack *p = *top;
-    if (!isEmpty)
+    if (p == NULL)
     {
-        printf("Stack is Empty\n");
+        // printf("Stack is Empty\n");
         return NULL;
     }
     node *x = p->data;
+    *pos = p->index;
     *top = (*top)->next;
     free(p);
     return x;
@@ -616,39 +696,3 @@ int isFull()
     }
     return 0;
 }
-
-// node *undo(node *root)
-// {
-//     node *temp;
-//     if (root == NULL)
-//     {
-//         return NULL;
-//     }
-
-//     if (root->left == NULL)
-//     {
-//         temp = root;
-//         root = root->right;
-//         root->parent = NULL;
-//     }
-//     else
-//     {
-//         temp = root;
-//         root->left->parent = NULL;
-//         node *pred = root->left;
-//         while (pred->right)
-//         {
-//             pred = pred->right;
-//         }
-//         splay(pred, &(root->left));
-//         root = root->left;
-//         root->right = temp->right;
-//         if (root->right)
-//         {
-//             root->right->parent = root;
-//         }
-//     }
-//     free(temp);
-//     new_offset(root);
-//     return root;
-// }

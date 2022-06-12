@@ -8,6 +8,7 @@ int main(int argc, char *argv[])
 {
     tree table = NULL;
     stack_ll undo_st = NULL;
+    stack_ll redo_st = NULL;
     char *str = (char *)malloc(1);
     strcpy(str, "\0");
     // printf("Reached here 1\n");
@@ -23,7 +24,7 @@ int main(int argc, char *argv[])
     while (1)
     {
         refreshScreen();
-        processKeypress(&str, &table, &undo_st);
+        processKeypress(&str, &table, &undo_st, &redo_st);
     }
 
     return 0;

@@ -330,7 +330,7 @@ void moveCursor(int key)
     }
 }
 
-void processKeypress(char **str, tree *table, stack_ll *undo_st)
+void processKeypress(char **str, tree *table, stack_ll *undo_st, stack_ll *redo_st)
 {
     static int start = 0;
     static int end = 0;
@@ -362,45 +362,49 @@ void processKeypress(char **str, tree *table, stack_ll *undo_st)
         editorSave();
         break;
     case CTRL_KEY('z'):
-        p = (*undo_st)->data;
-        splay(p, table);
+        if (*undo_st)
+        {
+            p = (*undo_st)->data;
+            splay(p, table);
 
-        // printf("Contents of p = %s, length = %ld\n", p->blk->txt, p->blk->length);
-        int x_end = p->size_left + p->blk->length;
-        int len_del = p->blk->length;
-        // printf("x_end before %d\n", x_end);
-        while (p->split_part)
-        {
-            len_del += p->split_part->blk->length;
-            p = p->split_part;
-        }
-        int x_start = x_end - len_del;
-        // printf("x_end after %d\n", x_end);
-        // printf("x_start = %d, x_end = %d\n", x_start, x_end);
-        int j = x_start;
-        if (win.cx > x_start)
-        {
-            while (win.cx != x_start)
+            // printf("Contents of p = %s, length = %ld\n", p->blk->txt, p->blk->length);
+            int x_end = p->size_left + p->blk->length;
+            int len_del = p->blk->length;
+            // printf("x_end before %d\n", x_end);
+            while (p->split_part)
             {
-                moveCursor(ARROW_LEFT);
+                len_del += p->split_part->blk->length;
+                p = p->split_part;
             }
-        }
-        else
-        {
-            while (win.cx != x_start)
+            int x_start = x_end - len_del;
+            // printf("x_end after %d\n", x_end);
+            // printf("x_start = %d, x_end = %d\n", x_start, x_end);
+            int j = x_start;
+            if (win.cx > x_start)
+            {
+                while (win.cx != x_start)
+                {
+                    moveCursor(ARROW_LEFT);
+                }
+            }
+            else
+            {
+                while (win.cx != x_start)
+                {
+                    moveCursor(ARROW_RIGHT);
+                }
+            }
+
+            for (int i = x_start; i < x_end; i++)
             {
                 moveCursor(ARROW_RIGHT);
+                delChar();
             }
+            *table = undo(*table, undo_st, redo_st);
+            remove("text_to_piece_table.txt");
+            fileInorder(*table, "text_to_piece_table.txt");
         }
 
-        for (int i = x_start; i < x_end; i++)
-        {
-            moveCursor(ARROW_RIGHT);
-            delChar();
-        }
-        *table = undo(*table, undo_st);
-        remove("text_to_piece_table.txt");
-        fileInorder(*table, "text_to_piece_table.txt");
         break;
     case CTRL_KEY('i'): // initiate
         start = win.cx;
@@ -410,7 +414,7 @@ void processKeypress(char **str, tree *table, stack_ll *undo_st)
         end = win.cx;
         // printf("At the end string is %s\n", *str);
         // printf("Reached here and x coordinate is %d\n", end);
-        *table = insert(table, strlen(*str), *str, start, undo_st);
+        *table = insert(table, strlen(*str), *str, start, undo_st, redo_st, 0);
         // inorder(*table);
         remove("text_to_piece_table.txt");
         fileInorder(*table, "text_to_piece_table.txt");
