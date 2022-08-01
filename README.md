@@ -5,6 +5,7 @@
 * [About the Project](#about-the-project)
 * [Built With](#built-with)
 * [Getting Started](#getting-started)
+* [Video](#video)
 
 ## About the Project
 Pieceditor is implementation of piece table using splay trees. Which is further integrated with text editor to perform various operations. User can insert a piece into text, perform undo, redo and also save their files once they are done with the editing
@@ -24,3 +25,8 @@ Pieceditor is implementation of piece table using splay trees. Which is further 
     $ make main
     $ ./main
     ```
+##  Video
+Following video demonstrates various operations which can be performed
+
+https://user-images.githubusercontent.com/77794870/182182274-4af73886-1bd0-401b-aba2-c868bb2cec19.mp4
+
